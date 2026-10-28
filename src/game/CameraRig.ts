@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PLANET_RADIUS, tangentAxes } from '../utils/math';
+import { PLANET_RADIUS, surfaceQuaternion, tangentAxes } from '../utils/math';
 
 export class CameraRig {
   readonly camera = new THREE.PerspectiveCamera(43, 1, .08, 200);
@@ -14,12 +14,14 @@ export class CameraRig {
   private focusNormal = new THREE.Vector3(0,1,0);
   private currentLookAt = new THREE.Vector3();
   private focused = false;
+  private portrait = false;
   private focusZoom = 1;
   private pointers = new Map<number,{x:number;y:number}>();
   private dragStart: {x:number;y:number}|null = null;
   private moved = false;
   private startPinchDistance = 0;
   private startPinchZoom = 0;
+  reducedMotion=false;
   onTap: ((x:number,y:number)=>void)|undefined;
   onHover: ((x:number,y:number)=>void)|undefined;
   onDrag: (()=>void)|undefined;
@@ -43,7 +45,7 @@ export class CameraRig {
     this.camera.updateProjectionMatrix();
     const previousHomeDistance=this.homeDistance;
     const halfAngle=THREE.MathUtils.degToRad(this.camera.fov/2);
-    const size=PLANET_RADIUS+1.2;
+    const size=PLANET_RADIUS+2.1;
     this.homeDistance=size*1.17/(Math.tan(halfAngle)*Math.min(1,this.camera.aspect));
     if(this.homeDistance<17)this.homeDistance=17;
     if(!this.focused) {
@@ -115,8 +117,9 @@ export class CameraRig {
     this.desiredPitch=THREE.MathUtils.clamp(this.desiredPitch+dy,-1.35,1.35);
   }
 
-  focus(point:THREE.Vector3):void {
+  focus(point:THREE.Vector3, portrait=false):void {
     this.focused=true;
+    this.portrait=portrait;
     this.focusPoint.copy(point);
     this.focusNormal.copy(point).normalize();
     this.focusZoom=1;
@@ -141,7 +144,7 @@ export class CameraRig {
   }
 
   update(delta:number):void {
-    const k=1-Math.exp(-delta*5.0);
+    const k=this.reducedMotion?1:1-Math.exp(-delta*5.0);
     this.yaw=THREE.MathUtils.lerp(this.yaw,this.desiredYaw,k);
     this.pitch=THREE.MathUtils.lerp(this.pitch,this.desiredPitch,k);
     this.distance=THREE.MathUtils.lerp(this.distance,this.desiredDistance,k);
@@ -153,10 +156,16 @@ export class CameraRig {
       const closeDist=Math.max(4.6, 1.25/(Math.tan(fov)*Math.min(1,this.camera.aspect)))*this.focusZoom;
       target=this.focusPoint.clone().addScaledVector(this.focusNormal,.17);
       p.copy(target).addScaledVector(this.focusNormal,closeDist).addScaledVector(tangent,closeDist*.23).add(new THREE.Vector3(0,.54,0));
+      if(this.portrait){
+        const front=new THREE.Vector3(0,0,1).applyQuaternion(surfaceQuaternion(this.focusNormal));
+        target=this.focusPoint.clone().addScaledVector(this.focusNormal,.35);
+        p.copy(target).addScaledVector(this.focusNormal,closeDist*.55).addScaledVector(front,closeDist*.95);
+      }
     }
-    const focusK=1-Math.exp(-delta*3.3);
+    const focusK=this.reducedMotion?1:1-Math.exp(-delta*3.3);
     this.camera.position.lerp(p,focusK);
     this.currentLookAt.lerp(target,focusK);
+    this.camera.up.lerp(this.focused&&this.portrait?this.focusNormal:new THREE.Vector3(0,1,0),focusK).normalize();
     this.camera.lookAt(this.currentLookAt);
   }
 }

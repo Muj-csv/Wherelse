@@ -1,10 +1,21 @@
 import { PLACES, type Place } from '../world/World';
+import { Bench } from './Bench';
+import type { BenchMood, FlowerColor } from '../story/bench';
 
 function el<T extends HTMLElement>(id: string): T {
   const node=document.getElementById(id);
   if(!node)throw new Error(`Missing interface element: #${id}`);
   return node as T;
 }
+
+const PLACE_HINTS:Record<string,string>={
+  nook:'A warm cup and a seat beside Pip',
+  pond:'Follow the blue water and wooden bridge',
+  meadow:'Look for butterflies above the flowers',
+  library:'A round little library among the trees',
+  grove:'Look for a circle of golden lanterns',
+  picnic:'A table tucked beyond the woodland',
+};
 
 export interface UIActions {
   navigate:(id:string)=>void;
@@ -13,6 +24,9 @@ export interface UIActions {
   resetCamera:()=>void;
   night:(night:boolean)=>void;
   resetProgress:()=>void;
+  benchMood:(mood:BenchMood)=>void;
+  benchFlower:(flower:FlowerColor|null)=>void;
+  motion:(reduced:boolean)=>void;
 }
 
 export class UI {
@@ -28,9 +42,23 @@ export class UI {
   private discovered=new Set<string>();
   private toastTimer=0;
   private storyAction=el<HTMLButtonElement>('story-action');
+  private bench:Bench;
 
   constructor(private actions:UIActions){
+    this.bench=new Bench({mood:actions.benchMood,flower:actions.benchFlower});
+    el('bench-button').addEventListener('click',()=>{
+      this.actions.navigate('nook');
+      // Keep the story action visible as the return-focus target after the modal closes.
+      this.storyAction.focus();
+      this.bench.open(this.storyAction);
+    });
     el('explore-button').addEventListener('click',()=>this.dismissIntro());
+    const motion=el<HTMLInputElement>('reduce-motion');
+    motion.checked=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    motion.addEventListener('change',()=>this.actions.motion(motion.checked));
+    window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',e=>{
+      motion.checked=e.matches;this.actions.motion(e.matches);
+    });
     el('menu-button').addEventListener('click',()=>this.togglePanel(this.menu));
     el('journal-button').addEventListener('click',()=>this.togglePanel(this.panel));
     el('close-menu').addEventListener('click',()=>this.menu.classList.add('hidden'));
@@ -52,10 +80,12 @@ export class UI {
       this.menu.classList.add('hidden');this.hideStory();this.showToast('A fresh little adventure begins. ✿');
     });
     this.storyAction.addEventListener('click',()=>{
+      if(this.selected==='nook'){this.bench.open(this.storyAction);return;}
       if(this.selected)this.actions.action(this.selected);
       this.hideStory();
     });
     document.addEventListener('keydown',e=>{
+      if(document.querySelector('dialog[open]'))return;
       if(e.key==='Escape'){this.closePanels();this.hideStory();}
       if(e.key.toLowerCase()==='j'&&e.target===document.body)this.togglePanel(this.panel);
     });
@@ -70,8 +100,11 @@ export class UI {
   }
 
   dismissIntro():void {
+    const first=!document.body.classList.contains('exploring');
+    document.body.classList.add('exploring');
     this.intro.classList.add('dismissed');
     el('tip').classList.add('show');
+    if(first)window.dispatchEvent(new Event('resize'));
   }
 
   private closePanels():void {this.panel.classList.add('hidden');this.menu.classList.add('hidden');}
@@ -96,14 +129,13 @@ export class UI {
       row.className='journal-row'+(found?' found':'');
       const icon=document.createElement('span');icon.className='journal-icon';icon.textContent=found?p.icon:'?';
       const words=document.createElement('span');words.className='journal-row-text';
-      const title=document.createElement('strong');title.textContent=found?p.title:'A hidden wonder';
-      const caption=document.createElement('small');caption.textContent=found?p.subtitle:'Somewhere on the planet...';
+      const title=document.createElement('strong');title.textContent=p.title;
+      const caption=document.createElement('small');caption.textContent=found?p.subtitle:PLACE_HINTS[p.id];
       words.append(title,caption);
-      const arrow=document.createElement('span');arrow.className='journal-arrow';arrow.textContent='↗';
+      const arrow=document.createElement('span');arrow.className='journal-arrow';arrow.textContent='→';arrow.setAttribute('aria-hidden','true');
       row.append(icon,words,arrow);
       row.addEventListener('click',()=>{
         this.dismissIntro();
-        if(!found){this.showToast('This little wonder is still waiting to be found. ✦');return;}
         this.panel.classList.add('hidden');this.actions.navigate(p.id);
       });
       items.append(row);
@@ -119,9 +151,10 @@ export class UI {
     el('story-description').textContent=place.description;
     this.storyAction.innerHTML='';
     const text=document.createTextNode(place.action+' ');
-    const arrow=document.createElement('span');arrow.textContent='↗';
+    const arrow=document.createElement('span');arrow.textContent='→';arrow.setAttribute('aria-hidden','true');
     this.storyAction.append(text,arrow);
     this.story.classList.remove('hidden');
+    this.storyAction.focus({preventScroll:true});
     if(isNew){
       this.showToast(this.discovered.size===PLACES.length?'You found all six wonders! Your little world is complete. ♡':`A new little wonder! ${this.discovered.size} of ${PLACES.length} found ✦`);
     }

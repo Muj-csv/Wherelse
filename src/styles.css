@@ -31,3 +31,79 @@ button:active{transform:scale(.965)}
 @media(max-width:570px){.topbar{gap:9px;padding:17px 15px}.brand-icon{font-size:23px}.brand-text strong{font-size:16px}.brand-text .eyebrow{font-size:7px}.icon-button{width:42px;height:42px;font-size:23px}.hamburger i{width:17px}.top-actions{gap:6px}.count-button{height:42px;padding:0 11px;font-size:11px}.count-button .spark{margin-right:4px;font-size:15px}.count-word{display:none}.intro{left:21px;top:auto;bottom:85px;transform:none;width:calc(100vw - 42px);max-width:335px}.intro.dismissed{transform:translateY(13px)}.intro h1{font-size:37px;margin-bottom:9px}.intro p{font-size:11px;line-height:1.55;max-width:265px;margin-bottom:12px}.intro-tag{padding:7px 10px;font-size:8px;margin-bottom:10px}.intro-cta{padding:11px 17px}.panel{top:72px;left:13px;max-height:calc(100dvh - 96px);padding:23px 22px}.panel h2{font-size:30px}.bottom-hud{bottom:19px;left:13px;right:13px}.tip{padding:10px 12px;font-size:9px;max-width:calc(100vw - 173px);line-height:1.35}.tip-icon{font-size:14px}.camera-tools{gap:5px}.camera-tools button{width:39px;height:39px;border-radius:13px;font-size:23px}.story{right:14px;left:14px;bottom:70px;width:auto;padding:19px 21px}.story h3{font-size:25px}.story p{font-size:12px;line-height:1.55}.toast{top:79px;font-size:10px;padding:11px 16px}}
 @media(max-width:370px){.brand-icon{display:none}.brand-text strong{font-size:14px}.count-button{padding:0 8px}.topbar{gap:7px}.intro h1{font-size:32px}.tip{font-size:8px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+/* Arrival gives the world and the invitation their own space. */
+body:not(.exploring) #world{left:36%;width:64%}
+.intro{left:clamp(24px,5.5vw,90px);max-width:34%;top:47%;transform:translateY(-34%)}
+.intro h1{font-size:clamp(36px,4.5vw,66px)}
+.intro p{color:#476452;text-shadow:none;max-width:290px}
+.intro .arrival-note{font-size:11px;line-height:1.6;max-width:250px;margin-top:17px;color:#536a59}
+.wander-button{background:transparent;border:0;color:var(--ink);padding:12px 10px;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:4px;pointer-events:auto}
+.intro .wander-button{display:block;margin-top:4px;padding-left:0}
+.motion-setting{display:block;margin-top:20px;font-size:13px;font-weight:700;cursor:pointer}
+.motion-setting input{accent-color:#4f775e;width:18px;height:18px;vertical-align:middle;margin-right:7px}
+.motion-setting small{display:block;margin:7px 0 0 29px;font-weight:400;line-height:1.5}
+.panel-foot{opacity:.85}.journal-row-text small{opacity:.9}
+.journal-row-text small{white-space:normal;line-height:1.5}
+.bench-dialog{box-sizing:border-box;width:min(490px,calc(100vw - 32px));max-height:calc(100dvh - 40px);margin:auto 4vw auto auto;padding:28px;border:1px solid #e3e8d6;border-radius:28px;background:#fbf8ed;color:#415c4a;box-shadow:0 20px 85px #203d3e38;overflow-y:auto;overscroll-behavior:contain}
+.bench-dialog::backdrop{background:#203d3e38}
+@media(min-width:701px){body.bench-open #world{left:0;width:calc(100% - 540px)}}
+.bench-dialog[open]{animation:bench-arrive .28s ease-out}
+@keyframes bench-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.bench-heading{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.bench-heading .eyebrow{color:#8e674f;font-size:9px}
+.bench-heading .plain-close{min-width:44px;min-height:44px;color:#415c4a;opacity:1}
+.bench-dialog h2{font:700 33px/1.12 'Fraunces',Georgia,serif;letter-spacing:-.04em;margin:8px 0 12px;max-width:330px}
+.bench-dialog p{font-size:13px;line-height:1.7}
+#bench-welcome{margin:0 0 14px;max-width:370px}
+.bench-memory{background:#eef0df;border-radius:12px;padding:10px 13px;font-size:11px!important;margin:0 0 18px}
+.bench-moods{display:flex;gap:7px;flex-wrap:wrap}
+.bench-moods button,.bench-story-choices button,.bench-flowers button{border:1px solid #b8c6b5;background:transparent;border-radius:14px;padding:11px 12px;color:#415c4a;font-size:11px;font-weight:700;min-height:44px}
+.bench-moods button[aria-pressed=true],.bench-story-choices button[aria-pressed=true],.bench-flowers button[aria-pressed=true]{border-color:#4a7156;background:#e3ead9;box-shadow:inset 0 0 0 1px #4a7156}
+.bench-scene{margin-top:18px;border-left:2px solid #ddb092;padding:2px 0 2px 15px}
+.bench-scene h3{font:700 23px/1.2 'Fraunces',Georgia,serif;letter-spacing:-.025em;margin:0 0 8px}
+.bench-scene p{margin:0;min-height:65px}
+.bench-story-choices{margin-top:13px;display:flex;flex-wrap:wrap;gap:7px}
+.bench-story-choices[hidden]{display:none}
+.bench-writing{margin-top:20px;border-top:1px solid #d8dfcd;padding-top:15px}
+.bench-writing summary{font-size:12px;font-weight:700;cursor:pointer;padding:8px 0;min-height:38px}
+.bench-writing summary span,.bench-flowers legend span{font-size:10px;font-weight:400;margin-left:6px}
+.bench-writing label{display:block;font-size:12px;line-height:1.5;margin:13px 0 8px}
+.bench-writing textarea{box-sizing:border-box;display:block;width:100%;min-height:100px;resize:vertical;max-height:220px;border:1px solid #aabca5;border-radius:12px;background:#fffdf5;padding:12px;font-family:inherit;font-size:13px;line-height:1.65;color:#415c4a}
+.bench-writing textarea:focus-visible,.bench-writing summary:focus-visible{outline:3px solid #a37cbe;outline-offset:3px}
+.note-count{display:block;text-align:right;font-size:10px;margin-top:5px}
+.remember-note{display:flex!important;align-items:flex-start;gap:8px;font-size:11px!important}
+.remember-note input{width:17px;height:17px;flex-shrink:0;accent-color:#4f775e}
+#bench-privacy{font-size:11px;color:#52644e;line-height:1.6}
+.bench-flowers{border:0;padding:0;margin:21px 0 0;min-width:0}
+.bench-flowers legend{font-size:12px;font-weight:700;padding:0}
+.bench-flowers p{font-size:11px;margin:7px 0 11px}
+.bench-flowers>div{display:flex;gap:8px;flex-wrap:wrap}
+.bench-flowers button{display:flex;align-items:center;gap:7px;min-width:90px;justify-content:center}
+.flower-swatch{display:inline-block;width:13px;height:13px;border-radius:50%;border:1px solid #415c4a40}
+.flower-swatch.peach{background:#efa58b}.flower-swatch.lilac{background:#b4a1df}.flower-swatch.mint{background:#86c6ad}
+.bench-footer{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:20px}
+.bench-footer .intro-cta{box-shadow:none;font-size:12px;padding:13px 18px;min-height:44px}
+#bench-status{font-size:12px;margin:14px 0 0}
+#bench-status:empty{display:none}
+.forget-button{border:0;background:none;color:#6d5f52;font-size:10px;padding:14px 0;min-height:44px;text-decoration:underline;text-underline-offset:3px;margin-top:7px}
+.night .intro .arrival-note{color:#f6e8d4}
+.reduce-motion *,.reduce-motion *:before,.reduce-motion *:after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+@media(max-width:700px){
+  body:not(.exploring) #world{left:0;top:280px;width:100%;height:calc(100% - 350px)}
+  .intro{top:96px;left:24px;bottom:auto;max-width:calc(100% - 48px);width:calc(100% - 48px);transform:none}
+  .intro h1{font-size:35px;line-height:1.05;margin-bottom:10px}
+  .intro h1 br{display:none}.intro h1 em{white-space:nowrap}
+  .intro-tag{margin-bottom:10px;padding:6px 9px;font-size:8px}
+  .intro p{font-size:12px;line-height:1.5;max-width:320px;margin-bottom:12px}
+  .intro .intro-cta{padding:12px 17px}
+  .intro .wander-button{display:inline-block;padding:12px;margin:0}
+  .intro .arrival-note{font-size:10px;max-width:100%;margin-top:10px}
+  .bench-dialog{margin:auto;width:calc(100vw - 24px);padding:20px;max-height:calc(100dvh - 24px);border-radius:22px}
+  .bench-dialog h2{font-size:29px}.bench-moods{gap:6px}.bench-moods button{padding:10px;font-size:10px}
+}
+@media(max-width:700px) and (max-height:740px){
+  .intro{top:80px}.intro h1{font-size:29px}.intro .arrival-note{display:none}
+  body:not(.exploring) #world{top:260px;height:calc(100% - 320px)}
+}
+@media(max-height:500px) and (min-width:701px){.intro{top:110px;transform:none}.intro h1{font-size:32px}.intro .arrival-note{display:none}}

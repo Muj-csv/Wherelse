@@ -25,9 +25,21 @@ Little Elsewhere is an original cozy, explorable 3D miniature planet, created fr
 
 The optional Google Fonts used for headings and body text will fall back to local fonts if unavailable.
 
+## A pause with Pip
+
+Choose **Sit with Pip** on arrival, or visit the Daydream Bench through the discovery journal. Choose company, quiet, or a short branching story about a student's unsent group-project message. Leave whenever you like; there are no timers or attendance rewards.
+
+You can leave a peach, lilac, or mint flower beside the bench. The flower and selected story path are saved on this browser and recalled on your next visit. Optional writing is **not saved by default**: check the save-words option and then choose **Leave my flower** to retain it. Saving without that checkbox removes previously saved words. **Remove my saved flower & note** deletes both. The world-guide discovery reset only resets discoveries, not your bench keepsake.
+
+Saved words are local browser data, not encrypted or synced. Anyone using the same browser profile may be able to read them. No reflection is sent to a server. Storage failures are reported and the experience remains usable for the current visit. This version is a solo experience; shared posts and multiplayer are not implemented.
+
+All six places can be visited with the journal's native buttons using a keyboard. The world guide's **Gentle motion** option stops decorative movement and makes camera/lighting changes immediate; the initial setting follows the system's reduced-motion preference. The bench uses a native modal dialog with Escape to close and focus restoration.
+
+`npm test` runs the storage regression tests using Node 22. For optional browser checks, install Python Playwright and Chromium, start `npm run preview` after building, then run `python tests/browser_smoke.py`. The script checks note consent and deletion, story recall, keyboard navigation, reduced motion, mobile layout and storage failures. Screenshots are written to `/tmp/wherelse-smoke` by default.
+
 ## Run locally
 
-Requirements: **Node.js 20.19+** and npm.
+Requirements: **Node.js 22** (see `.nvmrc`) and npm. The app supports Node.js 20.19+, but the test command uses Node 22's TypeScript stripping support.
 
 ```bash
 npm install
@@ -40,6 +52,7 @@ To create a production build:
 
 ```bash
 npm run typecheck
+npm test
 npm run build
 npm run preview
 ```

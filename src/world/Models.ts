@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mat } from '../utils/math';
+import type { BenchMood } from '../story/bench';
 
 const bark = mat('#816e6d');
 const darkBark = mat('#6f636b');
@@ -84,7 +85,7 @@ export function makeTeacup(): THREE.Group {
   return g;
 }
 
-export type LittleCharacter = { group: THREE.Group; bob: THREE.Group; leftArm: THREE.Group; eyes: THREE.Group; update: (time: number, excited: boolean) => void };
+export type LittleCharacter = { group: THREE.Group; bob: THREE.Group; leftArm: THREE.Group; eyes: THREE.Group; update: (time: number, excited: boolean, mood: BenchMood, reducedMotion: boolean) => void };
 
 export function makeCharacter(): LittleCharacter {
   const group = new THREE.Group();
@@ -131,15 +132,32 @@ export function makeCharacter(): LittleCharacter {
   sphere(bob,turquoise,[.54,.36,.17],[.13,.12,.12]);
   return {
     group, bob, leftArm, eyes,
-    update(time, excited) {
-      bob.position.y = .027*Math.sin(time*1.95) + (excited ? .05*Math.sin(time*6) : 0);
-      bob.rotation.z = .019*Math.sin(time*1.2);
-      leftArm.rotation.z = excited ? -.45 + .35*Math.sin(time*7.2) : .11*Math.sin(time*1.8);
+    update(time, excited, mood, reducedMotion) {
+      const calm=mood==='quiet';
+      bob.position.y = reducedMotion?0:(calm?.01:.022)*Math.sin(time*1.65);
+      bob.rotation.z = reducedMotion?0:.012*Math.sin(time*1.2);
+      bob.rotation.y = calm?-.10:mood==='story'?.10:.18;
+      leftArm.rotation.z = reducedMotion||calm?.08:excited?-.45+.28*Math.sin(time*5.4):.06*Math.sin(time*1.8);
+      leftArm.rotation.x = calm?-.18:0;
       const blinkTime = time % 5.7;
-      eyes.scale.y = blinkTime > 5.2 && blinkTime < 5.35 ? .12 : 1;
-      eyes.position.y = eyes.scale.y < .5 ? .82 : 0;
+      eyes.scale.y = !reducedMotion&&blinkTime>5.2&&blinkTime<5.35?.12:1;
+      eyes.position.y = .93*(1-eyes.scale.y);
     },
   };
+}
+
+export function makeKeepsakeFlower(): {group:THREE.Group; petals:THREE.MeshStandardMaterial} {
+  const group=new THREE.Group();
+  const petals=mat('#efa58b');
+  mesh(new THREE.CylinderGeometry(.14,.10,.20,12),mat('#d6ad88'),group,[0,.10,0]);
+  mesh(new THREE.CylinderGeometry(.018,.022,.48,6),mat('#548b68'),group,[0,.40,0]);
+  const leaf=sphere(group,mat('#83ad79'),[.085,.40,0],[.12,.035,.06]);leaf.rotation.z=.35;
+  for(let i=0;i<5;i++){
+    const angle=i/5*Math.PI*2;
+    sphere(group,petals,[Math.sin(angle)*.10,.66+Math.cos(angle)*.10,0],[.085,.10,.035]);
+  }
+  sphere(group,mat('#ffe2a0'),[0,.66,.025],[.062,.062,.03]);
+  return {group,petals};
 }
 
 export function makeLibrary(): THREE.Group {

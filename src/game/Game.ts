@@ -18,6 +18,8 @@ export class Game {
   private time=0;
   private lastTime=0;
   private running=true;
+  private reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  private renderNeeded=true;
 
   constructor(canvas:HTMLCanvasElement){
     this.canvas=canvas;
@@ -44,6 +46,8 @@ export class Game {
     this.scene.add(this.sun,this.sun.target);
     const fill=new THREE.DirectionalLight('#c3e8f6',.85);fill.position.set(6,-3,-9);this.scene.add(fill);
     this.camera=new CameraRig(canvas);
+    this.camera.reducedMotion=this.reducedMotion;
+    document.body.classList.toggle('reduce-motion',this.reducedMotion);
     this.ui=new UI({
       navigate:(id)=>this.visit(id),
       action:(id)=>this.revisit(id),
@@ -51,15 +55,26 @@ export class Game {
       resetCamera:()=>{this.camera.reset();this.ui.hideStory();this.ui.showToast('The whole world, just for you. ✿');},
       night:(value)=>this.setNight(value),
       resetProgress:()=>this.world.resetProgress(),
+      benchMood:(mood)=>this.world.setBenchMood(mood,this.time),
+      benchFlower:(flower)=>this.world.setBenchFlower(flower),
+      motion:(reduced)=>{
+        this.reducedMotion=reduced;this.camera.reducedMotion=reduced;
+        this.renderNeeded=true;
+        document.body.classList.toggle('reduce-motion',reduced);
+      },
     });
     this.ui.initialize(this.world.discovered);
     this.camera.onTap=(x,y)=>this.pick(x,y);
     this.camera.onHover=(x,y)=>this.hover(x,y);
     this.camera.onDrag=()=>{this.ui.hideStory();this.ui.dismissIntro();this.ui.showHover(undefined,0,0);};
+    for(const event of ['pointermove','pointerup','wheel'])canvas.addEventListener(event,()=>{this.renderNeeded=true;});
+    document.addEventListener('click',()=>{this.renderNeeded=true;});
     window.addEventListener('resize',()=>this.resize());
-    document.addEventListener('visibilitychange',()=>{if(document.hidden)this.lastTime=0;});
+    document.addEventListener('visibilitychange',()=>{this.lastTime=0;this.renderNeeded=true;});
     document.addEventListener('keydown',e=>{
-      if((e.target as HTMLElement).matches('input,textarea,select'))return;
+      if(document.querySelector('dialog[open]')||!(e.target===document.body||e.target===canvas))return;
+      this.renderNeeded=true;
+      if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','+','=','-'].includes(e.key))e.preventDefault();
       if(e.key==='ArrowLeft')this.camera.spin(-.22,0);
       if(e.key==='ArrowRight')this.camera.spin(.22,0);
       if(e.key==='ArrowUp')this.camera.spin(0,-.16);
@@ -75,6 +90,7 @@ export class Game {
   }
 
   private resize():void {
+    this.renderNeeded=true;
     const w=Math.max(1,this.canvas.clientWidth),h=Math.max(1,this.canvas.clientHeight);
     this.renderer.setSize(w,h,false);
     this.camera.resize();
@@ -110,7 +126,7 @@ export class Game {
   }
 
   private visit(id:string):void {
-    this.camera.focus(this.world.getPoint(id));
+    this.camera.focus(this.world.getPoint(id),id==='nook');
     const result=this.world.discover(id,this.time);
     if(result)this.ui.showDiscovery(result.place,result.isNew);
   }
@@ -137,12 +153,17 @@ export class Game {
 
   private animate(now:number):void {
     if(!this.running)return;
+    requestAnimationFrame(time=>this.animate(time));
+    if(document.hidden||(this.reducedMotion&&!this.renderNeeded)){
+      this.lastTime=now;return;
+    }
+    this.renderNeeded=false;
     const dt=this.lastTime?Math.min((now-this.lastTime)/1000,.06):.016;
     this.lastTime=now;
     this.time+=dt;
-    this.world.update(this.time,dt);
+    this.world.update(this.reducedMotion?0:this.time,this.reducedMotion?0:dt,this.reducedMotion);
     this.camera.update(dt);
-    const blend=1-Math.exp(-dt*2);
+    const blend=this.reducedMotion?1:1-Math.exp(-dt*2);
     const target=this.night?1:0;
     const current=(this.sun.userData.nightBlend as number|undefined)??0;
     const v=THREE.MathUtils.lerp(current,target,blend);
@@ -150,9 +171,8 @@ export class Game {
     this.sun.intensity=3.3-v*2.75;
     this.sun.color.set('#fff0cd').lerp(new THREE.Color('#9bb7ee'),v);
     this.sun.position.set(-8+v*2,13-v*17,10-v*5);
-    this.sky.intensity=2.4-v*1.8;
+    this.sky.intensity=2.4-v*1.25;
     this.renderer.toneMappingExposure=1.55-v*.4;
     this.renderer.render(this.scene,this.camera.camera);
-    requestAnimationFrame(time=>this.animate(time));
   }
 }

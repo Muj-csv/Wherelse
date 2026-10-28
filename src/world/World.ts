@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { fromDegrees, mat, mulberry32, onSurface, PLANET_RADIUS, randomDirection, surfaceQuaternion, tangentAxes, terrainRadius, UP } from '../utils/math';
 import { makePlanet, surfaceDisk } from './Planet';
+import { FLOWERS, type BenchMood, type FlowerColor } from '../story/bench';
+import { makeKeepsakeFlower } from './Models';
 import { makeBench, makeButterfly, makeCharacter, makeCottage, makeFlowerBush, makeLantern, makeLibrary, makeMushroom, makePicnic, makeStoneRing, makeTeacup, makeTree, makeBridge, type LittleCharacter } from './Models';
 
 export interface Place {
@@ -16,7 +18,7 @@ export interface Place {
 }
 
 export const PLACES: Place[] = [
-  { id:'nook', title:'The Daydream Bench', subtitle:'For the moments between moments', description:'Meet Pip, the world’s very small guardian of very big daydreams. They’ve been saving you a seat, a warm cup of tea, and a reminder that rest is its own kind of adventure.', icon:'☕', lat:24, lon:-17, action:'Say hello to Pip',color:'#edba78' },
+  { id:'nook', title:'The Daydream Bench', subtitle:'Company, quiet, or an unfinished story', description:'Between classes and everything else, there is a seat beside Pip. Come for a little company, a student story, or a pause that asks nothing of you.', icon:'☕', lat:24, lon:-17, action:'Sit with Pip',color:'#edba78' },
   { id:'pond', title:'Whispering Waters', subtitle:'The pond that listens', description:'A hush falls over the water. Even the ripples take their time here. Tap the pond again to send a wish across its surface.',icon:'≈',lat:6,lon:38,action:'Make a little wish',color:'#7dc7d3' },
   { id:'meadow', title:'Butterfly Meadow', subtitle:'The flowers know your name', description:'A hundred little flowers lean toward the sun as the butterflies dance. Somewhere between one bloom and the next, ordinary days become extraordinary.',icon:'✿',lat:-23,lon:13,action:'Wake the flowers',color:'#eda5c2' },
   { id:'library', title:'The Story Tree', subtitle:'Stories for every wanderer', description:'The tiny library has only one rule: leave with a story, return with a smile. Open a book, and you might find that the best stories were living around you all along.',icon:'▤',lat:33,lon:51,action:'Find a story',color:'#e6be84' },
@@ -48,6 +50,8 @@ export class World {
   private lastExcitedUntil = 0;
   private lightNight = false;
   private pondWishTime = 0;
+  private benchMood:BenchMood='company';
+  private keepsake=makeKeepsakeFlower();
 
   constructor() {
     this.group.add(makePlanet());
@@ -79,7 +83,8 @@ export class World {
   }
 
   private nearPlace(n:THREE.Vector3, angleThreshold = .966): boolean {
-    return PLACES.some(p => n.dot(fromDegrees(p.lat,p.lon)) > angleThreshold);
+    // Keep Pip's seat and keepsake clear of surrounding foliage at the close-up angle.
+    return PLACES.some(p => n.dot(fromDegrees(p.lat,p.lon)) > (p.id==='nook'?Math.min(angleThreshold,.966):angleThreshold));
   }
 
   private addMeadows(): void {
@@ -262,6 +267,9 @@ export class World {
         const character=makeCharacter();character.group.position.set(.24,.03,.05);
         obj.add(character.group);this.character=character;
         const cup=makeTeacup();cup.position.set(-.64,.58,.05);obj.add(cup);
+        this.keepsake.group.position.set(-.48,.58,.25);
+        this.keepsake.group.visible=false;
+        obj.add(this.keepsake.group);
         const patch=surfaceDisk(n,1.38,'#9acb74',{offset:.019,opacity:.6});this.group.add(patch);
       }else if(p.id==='pond'){
         obj=makeBridge();obj.scale.setScalar(.78);obj.position.set(.0,0,.0);
@@ -398,8 +406,18 @@ export class World {
     });
   }
 
-  update(time:number, delta:number):void {
-    if(this.character)this.character.update(time,time<this.lastExcitedUntil);
+  setBenchMood(mood:BenchMood,time:number):void {
+    this.benchMood=mood;
+    if(mood==='company')this.lastExcitedUntil=time+3;
+  }
+
+  setBenchFlower(flower:FlowerColor|null):void {
+    this.keepsake.group.visible=flower!==null;
+    if(flower)this.keepsake.petals.color.set(FLOWERS[flower].color);
+  }
+
+  update(time:number, delta:number, reducedMotion=false):void {
+    if(this.character)this.character.update(time,time<this.lastExcitedUntil,this.benchMood,reducedMotion);
     for(const t of this.swayingTrees){
       t.group.rotation.z = Math.sin(time*.74+t.phase)*t.strength;
     }
