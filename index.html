@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#cfecdd" />
+    <meta name="description" content="A tiny world that feels bigger the closer you look. A cozy, interactive 3D planet full of hidden wonders." />
+    <title>Little Elsewhere — A Pocket World</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght,SOFT,WONK@9..144,700,70,1&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="world" aria-label="Interactive three-dimensional miniature world"></canvas>
+      <div class="haze" aria-hidden="true"></div>
+      <div id="interface">
+        <header class="topbar">
+          <button class="icon-button menu-button" id="menu-button" title="Open world guide" aria-label="Open world guide"><span class="hamburger"><i></i><i></i><i></i></span></button>
+          <div class="brand"><span class="brand-icon">✿</span><div class="brand-text"><span class="eyebrow">A POCKET WORLD</span><strong>little elsewhere</strong></div></div>
+          <div class="top-actions"><button class="count-button" id="journal-button" title="View discoveries"><span class="spark">✦</span> <span id="count">0 / 6</span><span class="count-word"> wonders</span></button><button class="icon-button" id="day-button" title="Toggle day and night" aria-label="Toggle day and night">☀</button></div>
+        </header>
+        <div class="intro" id="intro"><span class="intro-tag">YOUR LITTLE ESCAPE</span><h1>There is magic<br/>in the <em>little things.</em></h1><p>Spin the planet, follow the butterflies, and find six tiny reasons to smile.</p><button class="intro-cta" id="explore-button">Let's wander <span>↗</span></button></div>
+        <aside class="panel hidden" id="journal" aria-label="Discovery journal"><div class="panel-head"><span class="eyebrow">FIELD NOTES</span><button class="plain-close" id="close-journal" aria-label="Close journal">×</button></div><h2>Little discoveries</h2><p class="panel-subtitle">Every corner has a story. Tap a place to visit.</p><div id="journal-items" class="journal-items"></div><p class="panel-foot">Made for slow mornings and curious hearts. ♡</p></aside>
+        <aside class="panel hidden" id="menu" aria-label="World guide"><div class="panel-head"><span class="eyebrow">YOUR WORLD GUIDE</span><button class="plain-close" id="close-menu" aria-label="Close menu">×</button></div><h2>A world to wander</h2><p class="panel-subtitle">No rush, no wrong turns. Take your time.</p><div class="instructions"><div><span>↔</span><p><strong>Explore</strong>Drag to spin your tiny planet.</p></div><div><span>⌕</span><p><strong>Look closer</strong>Scroll or pinch to zoom.</p></div><div><span>✦</span><p><strong>Discover</strong>Tap little places to find their stories.</p></div></div><button class="secondary-button" id="reset-progress">Start a new adventure</button><p class="panel-foot">Best enjoyed with a cup of something warm.</p></aside>
+        <div id="story" class="story hidden" role="status" aria-live="polite"><button class="plain-close story-close" id="story-close" aria-label="Close story">×</button><span id="story-kicker" class="story-kicker">A LITTLE WONDER</span><h3 id="story-title"></h3><p id="story-description"></p><button id="story-action" class="story-action">Keep exploring <span>↗</span></button></div>
+        <div class="world-label hidden" id="hover-label" aria-hidden="true"></div>
+        <div class="bottom-hud"><div class="tip" id="tip"><span class="tip-icon">☝</span><span>Drag to explore · Tap anything sparkly</span></div><div class="camera-tools"><button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button><button id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button><button id="reset-camera" title="Show entire planet" aria-label="Show entire planet">⌂</button></div></div>
+        <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+      </div>
+      <div id="loading"><div class="loading-flower">✿</div><p>Planting a little magic...</p></div>
+      <div id="unsupported" class="hidden"><h2>Oops! The planet is taking a nap.</h2><p>This experience needs a browser with WebGL enabled. Try an up-to-date Chrome, Edge, Firefox, or Safari.</p></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
