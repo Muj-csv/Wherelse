@@ -1,0 +1,12 @@
+import { readFileSync,existsSync,mkdirSync,chmodSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { createCommunity } from './community.mjs';
+const dir=resolve(process.env.COMMUNITY_DATA_DIR||'.community');
+mkdirSync(dir,{recursive:true,mode:0o700});chmodSync(dir,0o700);
+let invitations={};const file=resolve(dir,'invitations.json');
+if(existsSync(file))invitations=JSON.parse(readFileSync(file,'utf8'));
+const port=Number(process.env.PORT||8787);
+const app=createCommunity({dbPath:resolve(dir,'community.sqlite'),origin:process.env.COMMUNITY_ORIGIN||`http://127.0.0.1:${port}`,inviteCode:process.env.COMMUNITY_INVITE_CODE||invitations.member,moderatorCode:process.env.COMMUNITY_MODERATOR_CODE||invitations.moderator});
+chmodSync(resolve(dir,'community.sqlite'),0o600);
+app.server.listen(port,process.env.HOST||'127.0.0.1',()=>console.log(`Community server ready on port ${port}. Invited pilot; community posts require moderator review.`));
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>app.server.close(()=>{app.close();process.exit(0);}));

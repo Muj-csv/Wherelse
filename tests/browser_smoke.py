@@ -21,7 +21,7 @@ def prepare(context):
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.goto(args.url, wait_until='domcontentloaded')
-    page.wait_for_function("!document.getElementById('loading')")
+    page.wait_for_function("() => !document.getElementById('loading')")
     assert page.locator('#unsupported').evaluate("e => e.classList.contains('hidden')")
     return page, errors
 
@@ -50,7 +50,7 @@ with sync_playwright() as p:
     open_bench(page)
     page.locator('[data-mood="quiet"]').click()
     assert page.locator('#bench-scene-title').inner_text() == 'We can just sit.'
-    page.locator('summary').click()
+    page.locator('#bench summary').click()
     page.locator('#bench-note').fill('A thought that stays unsaved.')
     page.locator('[data-flower="lilac"]').click()
     page.locator('#bench-save').click()
@@ -72,16 +72,16 @@ with sync_playwright() as p:
         assert page.evaluate("document.getElementById('bench').contains(document.activeElement)")
     page.keyboard.press('Escape')
     assert not page.locator('#bench').is_visible()
-    page.wait_for_function("document.getElementById('story-action') === document.activeElement")
+    page.wait_for_function("() => document.getElementById('story-action') === document.activeElement")
     page.screenshot(path=str(output / '03-flower-world.png'))
     page.reload(wait_until='domcontentloaded')
-    page.wait_for_function("!document.getElementById('loading')")
+    page.wait_for_function("() => !document.getElementById('loading')")
     open_bench(page)
     assert page.locator('[data-mood="story"]').get_attribute('aria-pressed') == 'true'
     assert page.locator('#bench-scene-title').inner_text() == 'One honest line.'
     assert page.locator('#bench-note').input_value() == 'An explicitly saved test note.'
     if not page.locator('#remember-note').is_visible():
-        page.locator('summary').click()
+        page.locator('#bench summary').click()
     page.locator('#remember-note').uncheck()
     page.locator('#bench-save').click()
     assert memory(page)['note'] == ''

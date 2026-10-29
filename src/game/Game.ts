@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { World } from '../world/World';
 import { CameraRig } from './CameraRig';
 import { UI } from '../ui/UI';
+import { GRAPHICS,type GraphicsQuality } from './settings';
 
 export class Game {
   private readonly canvas:HTMLCanvasElement;
@@ -57,6 +58,9 @@ export class Game {
       resetProgress:()=>this.world.resetProgress(),
       benchMood:(mood)=>this.world.setBenchMood(mood,this.time),
       benchFlower:(flower)=>this.world.setBenchFlower(flower),
+      releaseBoat:()=>{this.world.releaseBoat(this.time,this.reducedMotion);this.renderNeeded=true;},
+      storyMemory:(count)=>{this.world.setStoryMemory(count);this.renderNeeded=true;},
+      quality:(quality)=>this.setQuality(quality),
       motion:(reduced)=>{
         this.reducedMotion=reduced;this.camera.reducedMotion=reduced;
         this.renderNeeded=true;
@@ -94,6 +98,18 @@ export class Game {
     const w=Math.max(1,this.canvas.clientWidth),h=Math.max(1,this.canvas.clientHeight);
     this.renderer.setSize(w,h,false);
     this.camera.resize();
+  }
+
+  private setQuality(quality:GraphicsQuality):void {
+    const settings=GRAPHICS[quality];
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,settings.pixelRatio));
+    this.renderer.shadowMap.enabled=settings.shadows;
+    this.sun.shadow.mapSize.set(settings.shadowSize,settings.shadowSize);
+    this.sun.shadow.map?.dispose();this.sun.shadow.map=null;
+    this.scene.traverse(object=>{
+      if(object instanceof THREE.Mesh){const materials=Array.isArray(object.material)?object.material:[object.material];materials.forEach(material=>{material.needsUpdate=true;});}
+    });
+    this.world.setDetail(settings.detail);this.resize();
   }
 
   private makeRay(x:number,y:number):void {
@@ -172,7 +188,7 @@ export class Game {
     this.sun.color.set('#fff0cd').lerp(new THREE.Color('#9bb7ee'),v);
     this.sun.position.set(-8+v*2,13-v*17,10-v*5);
     this.sky.intensity=2.4-v*1.25;
-    this.renderer.toneMappingExposure=1.55-v*.4;
+    this.renderer.toneMappingExposure=1.4-v*.25;
     this.renderer.render(this.scene,this.camera.camera);
   }
 }

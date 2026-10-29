@@ -20,7 +20,7 @@ Little Elsewhere is an original cozy, explorable 3D miniature planet, created fr
 - TypeScript: typed world, camera, model, gameplay, and UI systems.
 - Vite: local development and optimized production build.
 - HTML and CSS: responsive application shell and interface.
-- No authentication, paid service, external API, or proprietary model dependencies.
+- Solo activities need no account or external API. Optional invited community postcards use a self-hosted Node/SQLite service.
 - Procedural 3D art (no external 3D downloads or asset licensing required).
 
 The optional Google Fonts used for headings and body text will fall back to local fonts if unavailable.
@@ -31,15 +31,15 @@ Choose **Sit with Pip** on arrival, or visit the Daydream Bench through the disc
 
 You can leave a peach, lilac, or mint flower beside the bench. The flower and selected story path are saved on this browser and recalled on your next visit. Optional writing is **not saved by default**: check the save-words option and then choose **Leave my flower** to retain it. Saving without that checkbox removes previously saved words. **Remove my saved flower & note** deletes both. The world-guide discovery reset only resets discoveries, not your bench keepsake.
 
-Saved words are local browser data, not encrypted or synced. Anyone using the same browser profile may be able to read them. No reflection is sent to a server. Storage failures are reported and the experience remains usable for the current visit. This version is a solo experience; shared posts and multiplayer are not implemented.
+Saved words are local browser data, not encrypted or synced. Anyone using the same browser profile may be able to read them. No reflection is sent to a server. Storage failures are reported and the experience remains usable for the current visit. Shared postcards are available through the optional community service. Live multiplayer is not implemented.
 
 All six places can be visited with the journal's native buttons using a keyboard. The world guide's **Gentle motion** option stops decorative movement and makes camera/lighting changes immediate; the initial setting follows the system's reduced-motion preference. The bench uses a native modal dialog with Escape to close and focus restoration.
 
-`npm test` runs the storage regression tests using Node 22. For optional browser checks, install Python Playwright and Chromium, start `npm run preview` after building, then run `python tests/browser_smoke.py`. The script checks note consent and deletion, story recall, keyboard navigation, reduced motion, mobile layout and storage failures. Screenshots are written to `/tmp/wherelse-smoke` by default.
+`npm test` runs storage, branching-story and backend access-control regression tests using Node 22. For optional browser checks, install Python Playwright and Chromium, start `npm run preview` after building, then run `python tests/browser_smoke.py`. The script checks note consent and deletion, story recall, keyboard navigation, reduced motion, mobile layout and storage failures. Screenshots are written to `/tmp/wherelse-smoke` by default.
 
 ## Run locally
 
-Requirements: **Node.js 22** (see `.nvmrc`) and npm. The app supports Node.js 20.19+, but the test command uses Node 22's TypeScript stripping support.
+Requirements: **Node.js 22** (see `.nvmrc`) and npm. The solo frontend supports Node.js 20.19+, but the community service and test command require Node 22.13+.
 
 ```bash
 npm install
@@ -59,7 +59,16 @@ npm run preview
 
 `npm run build` produces a static site in `dist/`.
 
-## Deploy on Vercel
+## More places to pause
+
+- **Whispering Waters:** keep a thought explicitly on this browser, or release a paper boat and clear the saved thought. Optional sound starts only through interaction. No words are sent to the water or a server.
+- **Story Tree:** four authored branching student stories about belonging, academic pressure, friendship and small victories. Reading choices are remembered on this browser and can be reset.
+- **Graphics:** choose Light, Balanced or Rich in the world guide. Tiers adjust resolution, shadows and scenery density. Butterflies now alternate flying and resting; paths, pond materials and warm grove lighting make landmarks easier to read.
+- **Postcard garden:** at the Secret Picnic or in the world guide, join an invited community, save Only-me cards, or submit community cards for moderator review. Accounts, deletion, blocking, reporting and a moderator desk are backed by a real service.
+
+To run the complete app, build it, run `npm run community:init`, then `npm start`. See [the community guide](docs/community.md) for private invitations, deployment and moderation. `npm run dev` proxies API requests to the running service.
+
+## Deploy solo mode on Vercel
 
 1. Push this project to your GitHub repository.
 2. Import the repository at [vercel.com/new](https://vercel.com/new).
@@ -128,4 +137,4 @@ The game is intended for modern WebGL-enabled browsers. Interactions use invisib
 
 The supplied reference images informed the **miniature spherical-world composition**, rounded botanical silhouettes, warm pastel atmosphere, small props and cozy mood. Characters, landmark layouts, geometry, interface, text and behavior were created as new original material rather than copying the source artwork.
 
-All scene content is generated at runtime. No user data is sent to a server, and the only persistence is the local discovery list in your browser.
+All scene content is generated at runtime. Discoveries, opted-in private writing and story choices stay on the browser. Optional postcards are stored on the self-hosted community service; private writing is never automatically shared. See [community setup and privacy](docs/community.md).

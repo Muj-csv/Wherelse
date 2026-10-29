@@ -1,4 +1,5 @@
 import './styles.css';
+import './activities.css';
 import { Game } from './game/Game';
 
 try {

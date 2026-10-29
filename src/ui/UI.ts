@@ -1,5 +1,10 @@
 import { PLACES, type Place } from '../world/World';
 import { Bench } from './Bench';
+import { Waters } from './Waters';
+import { Library } from './Library';
+import { Community } from './Community';
+import { qualityOrDefault,type GraphicsQuality } from '../game/settings';
+import { localStorageOrUnavailable } from './dialog';
 import type { BenchMood, FlowerColor } from '../story/bench';
 
 function el<T extends HTMLElement>(id: string): T {
@@ -27,6 +32,9 @@ export interface UIActions {
   benchMood:(mood:BenchMood)=>void;
   benchFlower:(flower:FlowerColor|null)=>void;
   motion:(reduced:boolean)=>void;
+  releaseBoat:()=>void;
+  storyMemory:(count:number)=>void;
+  quality:(quality:GraphicsQuality)=>void;
 }
 
 export class UI {
@@ -43,9 +51,25 @@ export class UI {
   private toastTimer=0;
   private storyAction=el<HTMLButtonElement>('story-action');
   private bench:Bench;
+  private waters:Waters;
+  private library:Library;
+  private community:Community;
 
   constructor(private actions:UIActions){
     this.bench=new Bench({mood:actions.benchMood,flower:actions.benchFlower});
+    this.waters=new Waters(actions.releaseBoat);
+    this.library=new Library(actions.storyMemory);
+    this.community=new Community();
+    el('community-button').onclick=()=>{this.closePanels();this.dismissIntro();this.community.open(el('menu-button'));};
+    const quality=el<HTMLSelectElement>('graphics-quality');
+    let savedQuality:unknown;
+    try{savedQuality=localStorageOrUnavailable()?.getItem('little-elsewhere-graphics');}catch{/* Use balanced. */}
+    quality.value=qualityOrDefault(savedQuality);actions.quality(quality.value as GraphicsQuality);
+    quality.onchange=()=>{
+      actions.quality(qualityOrDefault(quality.value));
+      try{const storage=localStorageOrUnavailable();if(!storage)throw Error();storage.setItem('little-elsewhere-graphics',quality.value);}
+      catch{this.showToast('Graphics changed for this visit. This browser could not save the setting.');}
+    };
     el('bench-button').addEventListener('click',()=>{
       this.actions.navigate('nook');
       // Keep the story action visible as the return-focus target after the modal closes.
@@ -81,6 +105,9 @@ export class UI {
     });
     this.storyAction.addEventListener('click',()=>{
       if(this.selected==='nook'){this.bench.open(this.storyAction);return;}
+      if(this.selected==='pond'){this.waters.open(this.storyAction);return;}
+      if(this.selected==='library'){this.library.open(this.storyAction);return;}
+      if(this.selected==='picnic'){this.community.open(this.storyAction);return;}
       if(this.selected)this.actions.action(this.selected);
       this.hideStory();
     });

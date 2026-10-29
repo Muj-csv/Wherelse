@@ -3,3 +3,8 @@ dist/
 .DS_Store
 .vite/
 *.log
+.community/
+.env
+.env.*
+!.env.example
+__pycache__/
